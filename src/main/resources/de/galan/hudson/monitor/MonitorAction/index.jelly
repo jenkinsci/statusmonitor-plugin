@@ -1,0 +1,148 @@
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<html>
+<head>
+	<meta http-equiv="Pragma" content="no-cache" />
+	<meta http-equiv="Expires" content="-1" />
+	<meta name="decorator" content="none" />
+	<meta http-equiv="imagetoolbar" content="no" />
+	<meta http-equiv="Refresh" content="30" />
+	<title>Hudson Build Monitor</title>
+	<link type="image/vnd.microsoft.icon" rel="shortcut icon" href="../plugin/monitor/icons/monitor-16x16.png"/>
+</head>
+<body>
+
+<style type="text/css">
+	html, body {
+		margin: 0;
+		padding: 0;
+		height: 100%;
+		border: none
+	}
+
+	table {
+		table-layout: fixed;
+		padding: 0;
+		margin: 0;
+		border: 0;
+		width: 100%;
+		height: 100%;
+	}
+
+	table td, table td * {
+		text-align: center;
+		border: 0;
+		margin: 0;
+		padding: 0;
+		text-decoration: none;
+	}
+
+        table td {
+		border: 0px solid gray;
+	}
+         
+	table td .inner {
+		height: 100%;
+		vertical-align: middle;
+	}
+		
+	table td .inner .innerContainer {
+		position: relative;
+		top: 25%;
+	}
+        
+        table #jobtitle {
+        	font-size: 3em;
+        	font-weight: bold;
+        }
+
+        table .SUCCESS * {
+            background-color: #BFD4FF;
+            color: #0041C4;
+        }
+
+        table .FAILURE * {
+            background-color: #FF9180;
+            color: #B30700;
+        }
+
+        table .UNSTABLE * {
+            background-color: #FFF780;
+            color: #B3B000;
+        }
+
+        table .NOT_BUILD * {
+            background-color: #eee;
+            color: #777;
+        }
+
+        table .DISABLED * {
+            background-color: #eee;
+            color: #555;
+        }
+
+        table .ABORTED * {
+            background-color: #eee;
+            color: #B30700;
+        }
+
+    </style>
+
+
+<table cellspacing="0" cellpadding="0">
+	<j:set var="projectsArray" value="${it.projectsArray}"/>
+	<j:forEach var="row" items="${projectsArray}" varStatus="rowStatus">
+		<tr height="${it.rowsHeight}%" >
+
+			<j:forEach var="project" items="${row}">
+				<j:set var="resultClass" value="${it.getResult(project)}"/>
+
+				<!-- das td hatte noch ein width="50%" .. macht das noch sinn? -->
+				<td class="${resultClass}" colspan="${it.getColspan(rowStatus, projectsArray)}">
+					<div class="inner">
+					 	<div class="innerContainer">
+							<!-- Image -->
+							<!-- can't use them, they are not transparent. and btw. the imagesURL does not work! -->
+							<!-- <img width="48" height="48" src="${imagesURL}/images/48x48/${project.lastCompletedBuild.buildStatusUrl}" alt="${%pending}" /> <st:nbsp/> -->
+
+							<div id="jobtitle" style="overflow: hidden;">
+								<j:if test="${project.building}">
+									<!-- <img width="48px" height="48px" src="/plugin/monitor/images/ajax-loader.gif" title="${%monitor.build.currently}"/> -->
+									<img width="48px" height="48px" src="../plugin/monitor/images/ajax-loader.gif" title="${%monitor.build.currently}"/>
+								</j:if>
+								<a href="../${project.url}" title="Build Summary">${project.name}</a>
+							</div>
+							<br/>
+
+							<div style="font-size: 1.2em;">
+								<j:choose>
+									<j:when test="${project.lastCompletedBuild.timestampString != null}">
+										<a class="${project.lastCompletedBuild.result}" href="../${project.url}${project.lastCompletedBuild.number}">#${project.lastCompletedBuild.number}</a>
+										- ${project.lastCompletedBuild.timestampString} ${%monitor.build.text}
+									</j:when>
+									<j:otherwise>
+										${%monitor.build.never}
+									</j:otherwise>
+								</j:choose>
+							</div>
+						</div>
+					</div>
+				</td>
+			</j:forEach>
+
+		</tr>
+	</j:forEach>
+
+	<j:if test="${projectsArray.size() == 0}">
+		<tr height="100%" width="100%">
+			<td>
+				${%monitor.configure.first}
+			</td>
+		</tr>
+	</j:if>
+	
+
+</table>
+
+</body>
+</html>
+</j:jelly>
