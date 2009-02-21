@@ -1,4 +1,4 @@
-package de.galan.hudson.monitor;
+package hudson.plugins.statusmonitor;
 
 import hudson.model.Descriptor;
 import hudson.tasks.Publisher;
@@ -21,7 +21,7 @@ public class MonitorDescriptor extends Descriptor<Publisher> {
 
 	@Override
 	public String getDisplayName() {
-		return "Build Monitor";
+		return "Status Monitor";
 	}
 
 

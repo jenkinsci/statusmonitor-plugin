@@ -1,4 +1,4 @@
-package de.galan.hudson.monitor;
+package hudson.plugins.statusmonitor;
 
 import hudson.model.Action;
 import hudson.model.Hudson;
@@ -16,9 +16,9 @@ import org.kohsuke.stapler.export.ExportedBean;
 
 
 /**
- * Build Monitor, shows the configured Jobs in a single screen overview
+ * Status Monitor, shows the configured Jobs in a single screen overview
  * 
- * @author Daniel Gal√°n y Martins
+ * @author Daniel Gal·n y Martins
  */
 @ExportedBean (defaultVisibility = 999)
 public class MonitorAction implements Action {
@@ -30,8 +30,8 @@ public class MonitorAction implements Action {
 
 	public String getDisplayName() {
 		// The Name on the Dashboard
-		return "Build Monitor";
-		//return "Build Monitor</a> (<a href=\"/monitor?all=true\">all</a>)<a href=\"\">";
+		return "Status Monitor";
+		//return "Status Monitor</a> (<a href=\"/monitor?all=true\">all</a>)<a href=\"\">";
 	}
 
 

@@ -1,4 +1,4 @@
-package de.galan.hudson.monitor;
+package hudson.plugins.statusmonitor;
 
 import hudson.Launcher;
 import hudson.model.AbstractBuild;

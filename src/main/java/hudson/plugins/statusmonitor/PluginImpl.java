@@ -1,4 +1,4 @@
-package de.galan.hudson.monitor;
+package hudson.plugins.statusmonitor;
 
 import hudson.Plugin;
 import hudson.model.Hudson;
@@ -7,7 +7,7 @@ import hudson.tasks.BuildStep;
 
 
 /**
- * Entry point of the Build Monitor
+ * Entry point of the Status Monitor
  */
 public class PluginImpl extends Plugin {
 
