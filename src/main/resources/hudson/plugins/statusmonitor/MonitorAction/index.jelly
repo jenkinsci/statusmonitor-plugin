@@ -16,7 +16,7 @@
             margin: 0;
             padding: 0;
             height: 100%;
-            border: none
+            border: none;
         }
 
         #job_1 {
@@ -37,7 +37,7 @@
         }
          
 		.inner {
-			border: 1px solid gray;
+			border: 0px solid gray;
 			text-align: center;
 			height:100%;
 		}
@@ -54,6 +54,10 @@
 			padding: 0 10px;
 			width: 600px;
 			overflow: hidden;
+        }
+        
+        a {
+        	text-decoration: none;
         }
 
         .SUCCESS * {
