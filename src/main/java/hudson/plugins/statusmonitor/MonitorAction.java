@@ -131,11 +131,13 @@ public class MonitorAction implements Action {
 
 
 	@Exported
-	public int getColspan(LoopTagStatus varStatus, Project[][] projectsArray) {
-		if (varStatus.isLast() && (projectsArray.length > 1) && (projectsArray[projectsArray.length - 1].length == 1) && (projectsArray[0].length != 1)) {
-			return 2;
+	public int getStyleId(LoopTagStatus varStatus, Project[][] projectsArray) {
+		boolean lastLine = varStatus.isLast() && (projectsArray.length > 1) && (projectsArray[projectsArray.length - 1].length == 1);
+		boolean oneDimenional = (projectsArray[0].length == 1);
+		if (oneDimenional || lastLine) {
+			return 1;
 		}
-		return 1;
+		return 2;
 	}
 
 }

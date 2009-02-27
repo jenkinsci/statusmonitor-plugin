@@ -92,17 +92,8 @@
 
 			<j:forEach var="project" items="${row}">
 				<j:set var="resultClass" value="${it.getResult(project)}"/>
-
-				<j:choose>
-					<j:when test="${it.getColspan(rowStatus, projectsArray) != '1'}">
-						<j:set var="job" value="job_1"/>
-					</j:when>
-					<j:otherwise>
-						<j:set var="job" value="job_2"/>
-					</j:otherwise>
-				</j:choose>
 				
-				<div id="${job}" class="${resultClass}">
+				<div id="job_${it.getStyleId(rowStatus, projectsArray)}" class="${resultClass}">
 					<div class="inner">
 					 	<div class="innerContainer">
 							<!-- Image -->
@@ -113,14 +104,14 @@
 								<j:if test="${project.building}">
 									<img width="48px" height="48px" src="../plugin/statusmonitor/images/ajax-loader.gif" title="${%monitor.build.currently}"/>
 								</j:if>
-								<a href="${rootURL}/${project.url}" title="Build Summary">${project.name}</a>
+								<a href="../${project.url}" title="Build Summary">${project.name}</a>
 							</span>
 							<br/>
 
 							<div style="font-size: 1.2em;">
 								<j:choose>
 									<j:when test="${project.lastCompletedBuild.timestampString != null}">
-										<a class="${project.lastCompletedBuild.result}" href="${rootURL}/${project.url}${project.lastCompletedBuild.number}">#${project.lastCompletedBuild.number}</a>
+										<a class="${project.lastCompletedBuild.result}" href="../${project.url}${project.lastCompletedBuild.number}">#${project.lastCompletedBuild.number}</a>
 										- ${project.lastCompletedBuild.timestampString} ${%monitor.build.text}
 									</j:when>
 									<j:otherwise>
