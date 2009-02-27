@@ -94,7 +94,7 @@ public class MonitorAction implements Action {
 
 	@Exported
 	public double getRowsHeight() {
-		return 100 / getRows();
+		return 100 / new Double(getRows());
 	}
 
 
