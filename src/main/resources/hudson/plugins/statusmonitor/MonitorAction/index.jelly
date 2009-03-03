@@ -1,4 +1,5 @@
 <j:jelly trim="false" xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<j:set var="rootURL" value="${request.contextPath}" />
 <html>
 <head>
 	<meta http-equiv="Pragma" content="no-cache" />
@@ -7,7 +8,7 @@
 	<meta http-equiv="imagetoolbar" content="no" />
 	<meta http-equiv="Refresh" content="30" />
 	<title>Hudson Build Monitor</title>
-	<link type="image/vnd.microsoft.icon" rel="shortcut icon" href="../plugin/statusmonitor/icons/monitor-16x16.png"/>
+	<link type="image/vnd.microsoft.icon" rel="shortcut icon" href="${rootURL}/plugin/statusmonitor/icons/monitor-16x16.png"/>
 </head>
 <body>
 
@@ -102,16 +103,16 @@
 
 							<span id="jobtitle">
 								<j:if test="${project.building}">
-									<img width="48px" height="48px" src="../plugin/statusmonitor/images/ajax-loader.gif" title="${%monitor.build.currently}"/>
+									<img width="48px" height="48px" src="${rootURL}/plugin/statusmonitor/images/ajax-loader.gif" title="${%monitor.build.currently}"/>
 								</j:if>
-								<a href="../${project.url}" title="Build Summary">${project.name}</a>
+								<a href="${rootURL}/${project.url}" title="Build Summary">${project.name}</a>
 							</span>
 							<br/>
 
 							<div style="font-size: 1.2em;">
 								<j:choose>
 									<j:when test="${project.lastCompletedBuild.timestampString != null}">
-										<a class="${project.lastCompletedBuild.result}" href="../${project.url}${project.lastCompletedBuild.number}">#${project.lastCompletedBuild.number}</a>
+										<a class="${project.lastCompletedBuild.result}" href="${rootURL}/${project.url}${project.lastCompletedBuild.number}">#${project.lastCompletedBuild.number}</a>
 										- ${project.lastCompletedBuild.timestampString} ${%monitor.build.text}
 									</j:when>
 									<j:otherwise>
