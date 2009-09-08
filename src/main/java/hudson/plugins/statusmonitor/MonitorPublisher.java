@@ -11,6 +11,7 @@ import hudson.tasks.Publisher;
 
 import java.io.IOException;
 import java.util.List;
+import hudson.tasks.BuildStepMonitor;
 
 
 
@@ -58,4 +59,7 @@ public class MonitorPublisher extends Publisher {
 		}
 	}
 
+    public BuildStepMonitor getRequiredMonitorService() {
+        return BuildStepMonitor.BUILD;
+    }
 }

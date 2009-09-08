@@ -5,6 +5,8 @@ import hudson.model.Hudson;
 import hudson.model.Project;
 import hudson.tasks.Publisher;
 
+import hudson.Extension;
+import hudson.model.RootAction;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,15 +15,14 @@ import javax.servlet.jsp.jstl.core.LoopTagStatus;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 
-
-
 /**
  * Status Monitor, shows the configured Jobs in a single screen overview
  * 
  * @author Daniel Galán y Martins
  */
 @ExportedBean (defaultVisibility = 999)
-public class MonitorAction implements Action {
+@Extension
+public class MonitorAction implements RootAction {
 
 	private static final long serialVersionUID = 1L;
 
@@ -42,7 +43,7 @@ public class MonitorAction implements Action {
 
 	public String getUrlName() {
 		// The name of the URL path segment
-		return "monitor";
+		return "/monitor";
 	}
 
 
@@ -139,5 +140,4 @@ public class MonitorAction implements Action {
 		}
 		return 2;
 	}
-
 }

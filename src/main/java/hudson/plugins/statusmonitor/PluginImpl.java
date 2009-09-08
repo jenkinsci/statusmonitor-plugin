@@ -17,6 +17,6 @@ public class PluginImpl extends Plugin {
 	@Override
 	public void start() throws Exception {
 		BuildStep.PUBLISHERS.addNotifier(MONITOR_PUBLISHER_DESCRIPTOR);
-		Hudson.getInstance().getActions().add(new MonitorAction());
+//		Hudson.getInstance().getActions().add(new MonitorAction());
 	}
 }
