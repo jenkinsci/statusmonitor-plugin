@@ -1,6 +1,5 @@
 package hudson.plugins.statusmonitor;
 
-import hudson.model.Action;
 import hudson.model.Hudson;
 import hudson.model.Project;
 import hudson.tasks.Publisher;
@@ -57,7 +56,7 @@ public class MonitorAction implements RootAction {
 		List<Project> projects = Hudson.getInstance().getProjects();
 
 		for (Project project: projects) {
-			Publisher publisher = project.getPublisher(PluginImpl.MONITOR_PUBLISHER_DESCRIPTOR);
+			Publisher publisher = project.getPublisher(MonitorPublisher.DESCRIPTOR);
 			// Has Option been selected?
 			if (publisher != null) {
 				result.add(project);

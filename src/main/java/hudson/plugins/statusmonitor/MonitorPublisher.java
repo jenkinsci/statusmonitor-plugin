@@ -1,26 +1,24 @@
 package hudson.plugins.statusmonitor;
 
+import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.BuildListener;
-import hudson.model.Descriptor;
 import hudson.model.Hudson;
-import hudson.tasks.Publisher;
+import hudson.tasks.BuildStepMonitor;
+import hudson.tasks.Notifier;
 
 import java.io.IOException;
 import java.util.List;
-import hudson.tasks.BuildStepMonitor;
 
 
 
-public class MonitorPublisher extends Publisher {
+public class MonitorPublisher extends Notifier {
 
-	public Descriptor<Publisher> getDescriptor() {
-		return PluginImpl.MONITOR_PUBLISHER_DESCRIPTOR;
-	}
-
+	@Extension
+	public static final MonitorDescriptor DESCRIPTOR = new MonitorDescriptor();
 
 	@Override
 	public boolean needsToRunAfterFinalized() {
@@ -60,6 +58,6 @@ public class MonitorPublisher extends Publisher {
 	}
 
     public BuildStepMonitor getRequiredMonitorService() {
-        return BuildStepMonitor.BUILD;
+        return BuildStepMonitor.STEP;
     }
 }
