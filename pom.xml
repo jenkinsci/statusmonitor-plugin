@@ -10,7 +10,7 @@
 
 	<artifactId>statusmonitor</artifactId>
 	<packaging>hpi</packaging>
-	<version>1.2-SNAPSHOT</version>
+	<version>1.2</version>
 	<name>Hudson Status Monitor</name>
 	<url>http://wiki.hudson-ci.org/display/HUDSON/Status+Monitor+Plugin</url>
 
@@ -26,4 +26,10 @@
     </developer>
   </developers>
 
+
+  <scm>
+    <connection>scm:svn:https://guest@svn.dev.java.net/svn/hudson/tags/statusmonitor-1.2</connection>
+    <developerConnection>scm:svn:https://svn.dev.java.net/svn/hudson/tags/statusmonitor-1.2</developerConnection>
+    <url>https://hudson.dev.java.net/source/browse/hudson/hudson/plugins/statusmonitor/tags/statusmonitor-1.2</url>
+  </scm>
 </project>
