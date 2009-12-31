@@ -13,9 +13,17 @@
 	<version>1.2-SNAPSHOT</version>
 	<name>Hudson Status Monitor</name>
 	<url>http://wiki.hudson-ci.org/display/HUDSON/Status+Monitor+Plugin</url>
-	<contributors>
-		<contributor>
-			<name>redsolo</name>
-		</contributor>
-	</contributors>
+
+  <developers>
+    <developer>
+      <id>ashlux</id>
+      <name>Ash Lux</name>
+      <email>ashlux@gmail.com</email>
+      <url>http://www.ashlux.com/</url>
+    </developer>
+    <developer>
+      <name>redsolo</name>
+    </developer>
+  </developers>
+
 </project>

@@ -1,18 +1,13 @@
 package hudson.plugins.statusmonitor;
 
-import hudson.model.Hudson;
-import hudson.model.Project;
-import hudson.tasks.Publisher;
-
 import hudson.Extension;
-import hudson.model.RootAction;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.servlet.jsp.jstl.core.LoopTagStatus;
-
+import hudson.model.*;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
+
+import javax.servlet.jsp.jstl.core.LoopTagStatus;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Status Monitor, shows the configured Jobs in a single screen overview
@@ -22,7 +17,6 @@ import org.kohsuke.stapler.export.ExportedBean;
 @ExportedBean (defaultVisibility = 999)
 @Extension
 public class MonitorAction implements RootAction {
-
 	private static final long serialVersionUID = 1L;
 
 	private static final int COLUMNS = 2;
@@ -31,7 +25,6 @@ public class MonitorAction implements RootAction {
 	public String getDisplayName() {
 		// The Name on the Dashboard
 		return "Status Monitor";
-		//return "Status Monitor</a> (<a href=\"/monitor?all=true\">all</a>)<a href=\"\">";
 	}
 
 
@@ -47,27 +40,26 @@ public class MonitorAction implements RootAction {
 
 
 	/**
-	 * Returns the projects, that will be displayed
-	 * 
-	 * @return list containing Projects.
+	 * @return list projects that will be displayed
 	 */
-	private List<Project> getProjects() {
-		List<Project> result = new ArrayList<Project>();
-		List<Project> projects = Hudson.getInstance().getProjects();
+	private List<AbstractProject> getProjects() {
+        List<AbstractProject> result = new ArrayList<AbstractProject>();
+		List<TopLevelItem> topLevelItems = Hudson.getInstance().getItems();
+        for (TopLevelItem topLevelItem : topLevelItems) {
+            if (topLevelItem instanceof AbstractProject) {
+                AbstractProject abstractProject = (AbstractProject) topLevelItem;
+                if (abstractProject.getPublishersList().get(MonitorPublisher.DESCRIPTOR) != null) {
+                        result.add(abstractProject);
+                }
+            }
+        }
 
-		for (Project project: projects) {
-			Publisher publisher = project.getPublisher(MonitorPublisher.DESCRIPTOR);
-			// Has Option been selected?
-			if (publisher != null) {
-				result.add(project);
-			}
-		}
 		return result;
 	}
 
 
-	public String getResult(Project project) {
-		String result = null;
+	public String getResult(AbstractProject project) {
+		String result;
 		if ((project.getLastCompletedBuild() != null) && (project.getLastCompletedBuild().getResult() != null)) {
 			if (project.isDisabled()) {
 				result = "DISABLED";
@@ -99,25 +91,25 @@ public class MonitorAction implements RootAction {
 
 
 	@Exported
-	public Project[][] getProjectsArray() {
+	public AbstractProject[][] getProjectsArray() {
 		int rows = getRows();
-		Project[][] result = new Project[rows][];
-		List<Project> projects = getProjects();
+		AbstractProject[][] result = new AbstractProject[rows][];
+		List<AbstractProject> projects = getProjects();
 		for (int i = 0; i < rows; i++) {
-			Project[] row = result[i];
+			AbstractProject[] row = result[i];
 			if (row == null) {
 				if (projects.size() <= 3) {
-					row = new Project[1];
+					row = new AbstractProject[1];
 					row[0] = projects.get(i);
 				}
 				else {
 					// last row and uneven
 					if (((i + 1) == rows) && ((projects.size() % 2) != 0)) {
-						row = new Project[1];
+						row = new AbstractProject[1];
 						row[0] = projects.get(i * COLUMNS);
 					}
 					else {
-						row = new Project[COLUMNS];
+						row = new AbstractProject[COLUMNS];
 						for (int j = 0; j < COLUMNS; j++) {
 							row[j] = projects.get((i * COLUMNS) + j);
 						}
@@ -131,7 +123,7 @@ public class MonitorAction implements RootAction {
 
 
 	@Exported
-	public int getStyleId(LoopTagStatus varStatus, Project[][] projectsArray) {
+	public int getStyleId(LoopTagStatus varStatus, AbstractProject[][] projectsArray) {
 		boolean lastLine = varStatus.isLast() && (projectsArray.length > 1) && (projectsArray[projectsArray.length - 1].length == 1);
 		boolean oneDimenional = (projectsArray[0].length == 1);
 		if (oneDimenional || lastLine) {
