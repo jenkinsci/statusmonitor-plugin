@@ -93,7 +93,12 @@
 
 			<j:forEach var="project" items="${row}">
 				<j:set var="resultClass" value="${it.getResult(project)}"/>
-				
+				<j:set var="resultSound" value="${it.getSoundNotif(project)}"/>
+				<j:if test="${resultSound != null}">
+				<audio autoplay="true">
+				  <source src="${rootURL}/plugin/statusmonitor/sound/${resultSound}.wav" />
+				</audio>
+				</j:if>
 				<div id="job_${it.getStyleId(rowStatus, projectsArray)}" class="${resultClass}">
 					<div class="inner">
 					 	<div class="innerContainer">
