@@ -11,6 +11,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Status Monitor, shows the configured Jobs in a single screen overview
@@ -22,6 +23,8 @@ import java.util.List;
 public class MonitorAction implements RootAction {
 	private static final long serialVersionUID = 1L;
 
+	private static final Logger LOGGER = Logger.getLogger(MonitorAction.class.getName());
+	
 	private static final int COLUMNS = 2;
 
 	private static final int REFRESH_PAGE_TIME = 30;
@@ -82,18 +85,17 @@ public class MonitorAction implements RootAction {
 				return null;
 			}
 
-			if (project.isBuilding()) {
-				return null;
-			}
-
 			Run lastBuild = project.getLastCompletedBuild();
 			Calendar cal = Calendar.getInstance();
 			cal.add(Calendar.SECOND, -REFRESH_PAGE_TIME);
-			if (cal.getTime().equals(lastBuild.getTime()) || cal.getTime().before(lastBuild.getTime())) {
+			Date endTime = new Date(lastBuild.getTime().getTime()+lastBuild.getDuration());
+
+			if (cal.getTime().equals(endTime) || cal.getTime().before(endTime)) {
 				Run previousBuild = project.getLastCompletedBuild()
 						.getPreviousBuild();
-				if (previousBuild.getResult() != lastBuild.getResult() && 
-						( lastBuild.getResult() == Result.FAILURE ||  lastBuild.getResult() == Result.SUCCESS)) {
+				
+				if (!previousBuild.getResult().equals(lastBuild.getResult()) && 
+						( lastBuild.getResult().equals(Result.FAILURE) ||  lastBuild.getResult().equals(Result.SUCCESS))) {
 					return lastBuild.getResult().toString();
 				}
 			}
