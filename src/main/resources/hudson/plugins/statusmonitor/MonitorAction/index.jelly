@@ -7,7 +7,7 @@
 	<meta name="decorator" content="none" />
 	<meta http-equiv="imagetoolbar" content="no" />
 	<meta http-equiv="Refresh" content="30" />
-	<title>Hudson Build Monitor</title>
+	<title>Jenkins Build Monitor</title>
 	<link type="image/vnd.microsoft.icon" rel="shortcut icon" href="${rootURL}/plugin/statusmonitor/icons/monitor-16x16.png"/>
 </head>
 <body>
@@ -61,6 +61,26 @@
         	text-decoration: none;
         }
 
+		@-webkit-keyframes blinker {  
+		  0% { 
+			opacity: 1;
+		  }
+		  50%{
+			opacity: 0.5;
+		  }
+		  100% { 
+			opacity: 1;
+          }
+		}
+		
+		.css3-blink {
+		  -webkit-animation-name: blinker;  
+		  -webkit-animation-iteration-count: 5;  
+		  -webkit-animation-timing-function: ease-in;
+		  -webkit-animation-duration: 1s; 
+		}	
+
+
         .SUCCESS * {
             background-color: #BFD4FF;
             color: #0041C4;
@@ -98,7 +118,9 @@
 				<audio autoplay="true">
 				  <source src="${rootURL}/plugin/statusmonitor/sound/${resultSound}.wav" />
 				</audio>
+				<j:set var="resultClass" value="${resultClass} css3-blink"/>
 				</j:if>
+				
 				<div id="job_${it.getStyleId(rowStatus, projectsArray)}" class="${resultClass}">
 					<div class="inner">
 					 	<div class="innerContainer">
@@ -115,6 +137,9 @@
 							<br/>
 
 							<div style="font-size: 1.2em;">
+							<j:if test="${it.isClaim(project)}">
+								<img src="${imagesURL}/images/16x16/lock.png"/>
+							</j:if>
 								<j:choose>
 									<j:when test="${project.lastCompletedBuild.timestampString != null}">
 										<a class="${project.lastCompletedBuild.result}" href="${rootURL}/${project.url}${project.lastCompletedBuild.number}">#${project.lastCompletedBuild.number}</a>

@@ -151,6 +151,7 @@ public class MonitorActionTest
     private void addMonitorPublisher(AbstractProject project)
             throws IOException
     {
+    	
         //noinspection unchecked
         project.getPublishersList().add(new MonitorPublisher());
     }

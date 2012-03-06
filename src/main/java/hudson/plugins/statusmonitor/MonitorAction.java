@@ -1,17 +1,25 @@
 package hudson.plugins.statusmonitor;
 
 import hudson.Extension;
-import hudson.model.*;
-import org.kohsuke.stapler.export.Exported;
-import org.kohsuke.stapler.export.ExportedBean;
+import hudson.model.Result;
+import hudson.model.RootAction;
+import hudson.model.TopLevelItem;
+import hudson.model.AbstractProject;
+import hudson.model.Hudson;
+import hudson.model.Run;
 
-import javax.servlet.jsp.jstl.core.LoopTagStatus;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.servlet.jsp.jstl.core.LoopTagStatus;
+
+import org.kohsuke.stapler.export.Exported;
+import org.kohsuke.stapler.export.ExportedBean;
 
 /**
  * Status Monitor, shows the configured Jobs in a single screen overview
@@ -23,8 +31,9 @@ import java.util.logging.Logger;
 public class MonitorAction implements RootAction {
 	private static final long serialVersionUID = 1L;
 
-	private static final Logger LOGGER = Logger.getLogger(MonitorAction.class.getName());
-	
+	private static final Logger LOGGER = Logger.getLogger(MonitorAction.class
+			.getName());
+
 	private static final int COLUMNS = 2;
 
 	private static final int REFRESH_PAGE_TIME = 30;
@@ -77,6 +86,45 @@ public class MonitorAction implements RootAction {
 		return result;
 	}
 
+	public boolean isClaim(AbstractProject project) {
+		if ((project.getLastCompletedBuild() != null)
+				&& (project.getLastCompletedBuild().getResult() != null)) {
+			if (project.isDisabled()) {
+				return false;
+			}
+			try {
+				
+				Object obj = getActionByClassName(project.getLastCompletedBuild(),"hudson.plugins.claim.ClaimBuildAction");
+				
+				return obj != null && isClaimed(obj);
+			} catch (Exception ex) {
+				LOGGER.log(Level.WARNING,"",ex);
+				return false;
+			}
+		}
+		return false;
+	}
+
+	private Object getActionByClassName(Run lastCompletedBuild, String clazzname) {
+		for (Object obj :lastCompletedBuild.getActions()){
+			if (obj.getClass().getName().equals(clazzname)){
+				return obj;
+			}
+		}
+		return null;
+	}
+
+	private boolean isClaimed(Object obj) {
+		try {
+			Method m = obj.getClass().getMethod("isClaimed", null);
+			Object result = m.invoke(obj, null);
+			return result != null && ((Boolean) result).booleanValue();
+		} catch (Exception e) {
+			LOGGER.log(Level.WARNING,"",e);
+			return false;
+		}
+	}
+
 	public String getSoundNotif(AbstractProject project) {
 		String result = null;
 		if ((project.getLastCompletedBuild() != null)
@@ -88,14 +136,16 @@ public class MonitorAction implements RootAction {
 			Run lastBuild = project.getLastCompletedBuild();
 			Calendar cal = Calendar.getInstance();
 			cal.add(Calendar.SECOND, -REFRESH_PAGE_TIME);
-			Date endTime = new Date(lastBuild.getTime().getTime()+lastBuild.getDuration());
+			Date endTime = new Date(lastBuild.getTime().getTime()
+					+ lastBuild.getDuration());
 
 			if (cal.getTime().equals(endTime) || cal.getTime().before(endTime)) {
 				Run previousBuild = project.getLastCompletedBuild()
 						.getPreviousBuild();
-				
-				if (!previousBuild.getResult().equals(lastBuild.getResult()) && 
-						( lastBuild.getResult().equals(Result.FAILURE) ||  lastBuild.getResult().equals(Result.SUCCESS))) {
+
+				if (!previousBuild.getResult().equals(lastBuild.getResult())
+						&& (lastBuild.getResult().equals(Result.FAILURE) || lastBuild
+								.getResult().equals(Result.SUCCESS))) {
 					return lastBuild.getResult().toString();
 				}
 			}
