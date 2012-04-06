@@ -2,6 +2,8 @@ package hudson.plugins.statusmonitor;
 
 import hudson.matrix.MatrixProject;
 import hudson.maven.MavenModuleSet;
+import hudson.model.FreeStyleBuild;
+import hudson.model.Result;
 import hudson.model.AbstractProject;
 import hudson.model.FreeStyleProject;
 import org.jvnet.hudson.test.HudsonTestCase;
@@ -20,7 +22,7 @@ public class MonitorActionTest
 
         monitorAction = new MonitorAction();
     }
-
+    	
     public void testGetProjectsArray_shouldGetProjectFreeStyleProjectWithAMonitorPublisher()
             throws Exception
     {
@@ -149,6 +151,7 @@ public class MonitorActionTest
     private void addMonitorPublisher(AbstractProject project)
             throws IOException
     {
+    	
         //noinspection unchecked
         project.getPublishersList().add(new MonitorPublisher());
     }
