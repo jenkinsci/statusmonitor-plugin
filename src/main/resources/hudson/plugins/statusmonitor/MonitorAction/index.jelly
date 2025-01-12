@@ -1,141 +1,140 @@
+<?jelly escape-by-default='true'?>
 <j:jelly trim="false" xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-<j:set var="rootURL" value="${request.contextPath}" />
-<html>
-<head>
-	<meta http-equiv="Pragma" content="no-cache" />
-	<meta http-equiv="Expires" content="-1" />
-	<meta name="decorator" content="none" />
-	<meta http-equiv="imagetoolbar" content="no" />
-	<meta http-equiv="Refresh" content="30" />
-	<title>Hudson Build Monitor</title>
-	<link type="image/vnd.microsoft.icon" rel="shortcut icon" href="${rootURL}/plugin/statusmonitor/icons/monitor-16x16.png"/>
-</head>
-<body>
+  <l:view contentType="text/html;charset=UTF-8">
+    <st:setHeader name="Expires" value="-1" />
+    <st:setHeader name="Cache-Control" value="no-cache,no-store,must-revalidate" />
+    <st:setHeader name="X-Hudson-Theme" value="default" />
+    <st:setHeader name="Referrer-Policy" value="same-origin" />
+    <st:setHeader name="Cross-Origin-Opener-Policy" value="same-origin" />
+    <j:set var="extensionsAvailable" value="${h.extensionsAvailable}"/>
 
-    <style type="text/css">
-        html, body {
-            margin: 0;
-            padding: 0;
+    <html data-theme="dark">
+      <head data-rooturl="${rootURL}" data-resurl="${resURL}" data-imagesurl="${imagesURL}" resURL="${resURL}"
+            data-extensions-available="${extensionsAvailable}"
+            data-crumb-header="${h.getCrumbRequestField()}" data-crumb-value="${h.getCrumb(request)}"
+            data-unit-test="${h.isUnitTest}">
+        <meta http-equiv="Refresh" content="-1" />
+        <title>Jenkins Build Monitor</title>
+        <script src="${resURL}/scripts/behavior.js" type="text/javascript"/>
+        <script src="${resURL}/scripts/hudson-behavior.js" type="text/javascript"></script>
+        <link rel="stylesheet" href="${resURL}/jsbundles/styles.css" type="text/css" />
+        <link rel="icon" href="${resURL}/favicon.svg" type="image/svg+xml" />
+        <j:if test="${extensionsAvailable}">
+          <j:forEach var="pd" items="${h.pageDecorators}">
+            <st:include it="${pd}" page="header.jelly" optional="true" />
+          </j:forEach>
+        </j:if>
+      </head>
+      <body>
+        <j:set var="projects" value="${it.getProjects()}"/>
+        <j:set var="columns" value="${it.getColumns(projects)}"/>
+
+        <style type="text/css">
+          .sm-card-container {
+            display:grid;
+            grid-template-columns: repeat(${columns}, 1fr);
+            padding: 5px;
+            gap: 5px;
             height: 100%;
-            border: none;
-        }
+          }
 
-        #job_1 {
-			padding: 0;
-            margin: 0;
-            border: 0;
-			height: 100%;
+          .sm-card {
+            margin-bottom: 0px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 1rem;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+            border-radius: 1rem;
             width: 100%;
-        }
-		
-        #job_2 {
-			padding: 0;
-            margin: 0;
-            border: 0;
-			float: left;
-			height: 100%;
-            width: 50%;
-        }
-         
-		.inner {
-			border: 0px solid gray;
-			text-align: center;
-			height:100%;
-		}
+          }
 
-		.innerContainer {
-			padding-top: 5%;
-			height: ${it.rowsHeight}%;
-		}
-      
-        #jobtitle {
-        	font-size: 3em;
-        	font-weight: bold;
-			height: 60px;
-			padding: 0 10px;
-			width: 600px;
-			overflow: hidden;
-        }
-        
-        a {
-        	text-decoration: none;
-        }
+          .sm-card__title {
+            align-items: center;
+            display: flex;
+            gap: 5px;
+            justify-content: left;
+            font-size: 1.5rem;
+          }
 
-        .SUCCESS * {
-            background-color: #BFD4FF;
-            color: #0041C4;
-        }
+          .sm-card__title a {
+            font-size: 1.4rem !important;
+            font-weight: 700;
+          }
 
-        .FAILURE * {
-            background-color: #FF9180;
-            color: #B30700;
-        }
+          .sm-card--success {
+            background-color: var(--alert-success-bg-color);
+          }
 
-        .UNSTABLE * {
-            background-color: #FFF780;
-            color: #B3B000;
-        }
+          .sm-card--unstable {
+            background-color: var(--alert-warning-bg-color);
+          }
 
-        .NOT_BUILD * {
-            background-color: #eee;
-            color: #777;
-        }
+          .sm-card--failure {
+            background-color: var(--alert-danger-bg-color);
+          }
 
-        .DISABLED * {
-            background-color: #eee;
-            color: #555;
-        }
-    </style>
+          .sm-card--not_built {
+            background-color: var(--alert-info-bg-color);
+          }
 
-	<j:set var="projectsArray" value="${it.projectsArray}"/>
-	<j:forEach var="row" items="${projectsArray}" varStatus="rowStatus">
-		<div style="height:${it.rowsHeight}%;overflow:hidden;">
+          .sm-card--aborted {
+            background-color: var(--medium-grey);
+          }
 
-			<j:forEach var="project" items="${row}">
-				<j:set var="resultClass" value="${it.getResult(project)}"/>
-				
-				<div id="job_${it.getStyleId(rowStatus, projectsArray)}" class="${resultClass}">
-					<div class="inner">
-					 	<div class="innerContainer">
-							<!-- Image -->
-							<!-- can't use them, they are not transparent. and btw. the imagesURL does not work! -->
-							<!-- <img width="48" height="48" src="${imagesURL}/images/48x48/${project.lastCompletedBuild.buildStatusUrl}" alt="${%pending}" /> <st:nbsp/> -->
+          .sm-card--disabled {
+            background-color: var(--light-grey);
+          }
 
-							<span id="jobtitle">
-								<j:if test="${project.building}">
-									<img width="48px" height="48px" src="${rootURL}/plugin/statusmonitor/images/ajax-loader.gif" title="${%monitor.build.currently}"/>
-								</j:if>
-								<a href="${rootURL}/${project.url}" title="Build Summary">${project.name}</a>
-							</span>
-							<br/>
+          .sm-last-row {
+            display: flex;
+            gap:5px;
+            grid-column-start: 1;
+            grid-column-end: ${columns + 1};
+            width: 100%;
+          }
 
-							<div style="font-size: 1.2em;">
-								<j:choose>
-									<j:when test="${project.lastCompletedBuild.timestampString != null}">
-										<a class="${project.lastCompletedBuild.result}" href="${rootURL}/${project.url}${project.lastCompletedBuild.number}">#${project.lastCompletedBuild.number}</a>
-										- ${project.lastCompletedBuild.timestampString} ${%monitor.build.text}
-									</j:when>
-									<j:otherwise>
-										${%monitor.build.never}
-									</j:otherwise>
-								</j:choose>
-							</div>
-						</div>
-					</div>
-				</div>
-			</j:forEach>
-			
-		</div>
+          a:link, a:visited {
+            color: inherit;
+          }
+        </style>
+  <div class="sm-card-container">
+	<j:forEach var="project" items="${projects}" varStatus="rowStatus">
+      <j:if test="${it.isLastRow(projects.size(), rowStatus.index, columns)}">
+        <j:set var="finalDiv" value="${true}"/>
+        <j:out value="&lt;div class=&quot;sm-last-row&quot;>"/>
+      </j:if>
+      <div class="sm-card sm-card--${it.getResult(project)}">
+        <div class="sm-card__title">
+          <a href="${rootURL + '/' + project.url}" class="jenkins-!-display-contents">
+            <l:icon src="symbol-status-${project.iconColor.iconName}" class="icon-md" tooltip="${project.iconColor.description}"/>
+            ${project.fullDisplayName}
+          </a>
+        </div>
+        <div>
+          <j:choose>
+            <j:when test="${project.lastCompletedBuild.timestampString != null}">
+              <a class="${project.lastCompletedBuild.result}" href="${rootURL}/${project.url}${project.lastCompletedBuild.number}">#${project.lastCompletedBuild.number}</a>
+              - ${project.lastCompletedBuild.timestampString} ${%monitor.build.text}
+            </j:when>
+            <j:otherwise>
+              ${%monitor.build.never}
+            </j:otherwise>
+          </j:choose>
+        </div>
+      </div>
+    <j:if test="${finalDiv and rowStatus.last}">
+      <j:out value="&lt;/div>"/>
+    </j:if>
 	</j:forEach>
 
 	<j:if test="${projectsArray.size() == 0}">
-		<tr height="100%" width="100%">
-			<td>
 				${%monitor.configure.first}
-			</td>
-		</tr>
 	</j:if>
-
+  </div>
 </body>
 </html>
+  </l:view>
 </j:jelly>

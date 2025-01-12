@@ -1,0 +1,8 @@
+<?jelly escape-by-default='true'?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <f:section title="${%Status Monitor Configuration}">
+    <f:entry title="Number of columns" field="columns">
+      <f:number min="1" max="10" default="2"/>
+    </f:entry>
+  </f:section>
+</j:jelly>
