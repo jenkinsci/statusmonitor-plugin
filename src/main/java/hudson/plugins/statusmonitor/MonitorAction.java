@@ -1,5 +1,6 @@
 package hudson.plugins.statusmonitor;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.Job;
@@ -35,6 +36,7 @@ public class MonitorAction implements RootAction {
 	}
 
 
+    @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", justification = "Known to be not null")
     public int getColumns(List<Job<?, ?>> projects) {
         int columns = GlobalConfiguration.all().get(MonitorConfiguration.class).getColumns();
         return Math.min(projects.size(), columns);
@@ -61,6 +63,7 @@ public class MonitorAction implements RootAction {
 		return result;
 	}
 
+    @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", justification = "Known to be not null")
 	public String getResult(Job<?, ?> project) {
 		String result;
         if ((project instanceof AbstractProject<?, ?> && ((AbstractProject<?, ?>) project).isDisabled())
