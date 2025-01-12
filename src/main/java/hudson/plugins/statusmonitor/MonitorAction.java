@@ -1,26 +1,22 @@
 package hudson.plugins.statusmonitor;
 
 import hudson.Extension;
-import hudson.model.*;
-import org.kohsuke.stapler.export.Exported;
-import org.kohsuke.stapler.export.ExportedBean;
-
-import javax.servlet.jsp.jstl.core.LoopTagStatus;
+import hudson.model.AbstractProject;
+import hudson.model.Job;
+import hudson.model.RootAction;
+import hudson.model.TopLevelItem;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import jenkins.model.GlobalConfiguration;
+import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 
 /**
  * Status Monitor, shows the configured Jobs in a single screen overview
- * 
- * @author Daniel Galán y Martins
  */
-@ExportedBean (defaultVisibility = 999)
 @Extension
 public class MonitorAction implements RootAction {
-	private static final long serialVersionUID = 1L;
-
-	private static final int COLUMNS = 2;
-
 
 	public String getDisplayName() {
 		// The Name on the Dashboard
@@ -29,27 +25,35 @@ public class MonitorAction implements RootAction {
 
 
 	public String getIconFileName() {
-		return MonitorDescriptor.ACTION_LOGO_MEDIUM;
+		return "symbol-pulse-outline plugin-ionicons-api";
 	}
 
 
 	public String getUrlName() {
 		// The name of the URL path segment
-		return "/monitor";
+		return "monitor";
 	}
 
+
+    public int getColumns(List<Job<?, ?>> projects) {
+        int columns = GlobalConfiguration.all().get(MonitorConfiguration.class).getColumns();
+        return Math.min(projects.size(), columns);
+    }
 
 	/**
 	 * @return list projects that will be displayed
 	 */
-	private List<AbstractProject> getProjects() {
-        List<AbstractProject> result = new ArrayList<AbstractProject>();
-		List<TopLevelItem> topLevelItems = Hudson.getInstance().getItems();
-        for (TopLevelItem topLevelItem : topLevelItems) {
-            if (topLevelItem instanceof AbstractProject) {
-                AbstractProject abstractProject = (AbstractProject) topLevelItem;
-                if (abstractProject.getPublishersList().get(MonitorPublisher.DESCRIPTOR) != null) {
-                        result.add(abstractProject);
+	public List<Job<?, ?>> getProjects() {
+        List<Job<?, ?>> result = new ArrayList<>();
+		List<TopLevelItem> topLevelItems = Jenkins.get().getAllItems(TopLevelItem.class);
+        for (TopLevelItem item : topLevelItems) {
+            if (item instanceof Job<?, ?>) {
+                Job<?, ?> job = (Job<?, ?>) item;
+                MonitorJobProperty prop = job.getProperty(MonitorJobProperty.class);
+                if (prop != null) {
+                    result.add(job);
+                } else if (job instanceof AbstractProject<?, ?> && ((AbstractProject<?, ?>) job).getPublishersList().get(MonitorPublisher.DESCRIPTOR) != null) {
+                    result.add(job);
                 }
             }
         }
@@ -57,78 +61,24 @@ public class MonitorAction implements RootAction {
 		return result;
 	}
 
-
-	public String getResult(AbstractProject project) {
+	public String getResult(Job<?, ?> project) {
 		String result;
-		if ((project.getLastCompletedBuild() != null) && (project.getLastCompletedBuild().getResult() != null)) {
-			if (project.isDisabled()) {
-				result = "DISABLED";
-			}
-			else {
-				result = project.getLastCompletedBuild().getResult().toString();
-			}
-		}
-		else {
-			result = "NOT_BUILD";
-		}
-		return result;
+        if ((project instanceof AbstractProject<?, ?> && ((AbstractProject<?, ?>) project).isDisabled())
+                || (project instanceof WorkflowJob && ((WorkflowJob) project).isDisabled())) {
+            result = "DISABLED";
+        } else {
+            if ((project.getLastCompletedBuild() != null) && (project.getLastCompletedBuild().getResult() != null)) {
+                result = project.getLastCompletedBuild().getResult().toString();
+            } else {
+                result = "NOT_BUILT";
+            }
+        }
+		return result.toLowerCase(Locale.ROOT);
 	}
 
+    public boolean isLastRow(int size, int index, int columns) {
+        int rowCount = size / columns;
 
-	private int getRows() {
-		int size = getProjects().size();
-		if (size <= 3) {
-			return size;
-		}
-		return ((size % COLUMNS) == 0) ? (size / COLUMNS) : ((size + 1) / COLUMNS);
-	}
-
-
-	@Exported
-	public double getRowsHeight() {
-		return 100 / new Double(getRows());
-	}
-
-
-	@Exported
-	public AbstractProject[][] getProjectsArray() {
-		int rows = getRows();
-		AbstractProject[][] result = new AbstractProject[rows][];
-		List<AbstractProject> projects = getProjects();
-		for (int i = 0; i < rows; i++) {
-			AbstractProject[] row = result[i];
-			if (row == null) {
-				if (projects.size() <= 3) {
-					row = new AbstractProject[1];
-					row[0] = projects.get(i);
-				}
-				else {
-					// last row and uneven
-					if (((i + 1) == rows) && ((projects.size() % 2) != 0)) {
-						row = new AbstractProject[1];
-						row[0] = projects.get(i * COLUMNS);
-					}
-					else {
-						row = new AbstractProject[COLUMNS];
-						for (int j = 0; j < COLUMNS; j++) {
-							row[j] = projects.get((i * COLUMNS) + j);
-						}
-					}
-				}
-				result[i] = row;
-			}
-		}
-		return result;
-	}
-
-
-	@Exported
-	public int getStyleId(LoopTagStatus varStatus, AbstractProject[][] projectsArray) {
-		boolean lastLine = varStatus.isLast() && (projectsArray.length > 1) && (projectsArray[projectsArray.length - 1].length == 1);
-		boolean oneDimenional = (projectsArray[0].length == 1);
-		if (oneDimenional || lastLine) {
-			return 1;
-		}
-		return 2;
-	}
+        return index == columns * rowCount;
+    }
 }

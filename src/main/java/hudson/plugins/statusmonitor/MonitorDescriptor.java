@@ -7,7 +7,7 @@ import net.sf.json.JSONObject;
 
 import org.kohsuke.stapler.StaplerRequest;
 
-
+@Deprecated
 public class MonitorDescriptor extends BuildStepDescriptor<Publisher> {
 
 	public static final String ACTION_LOGO_LARGE = "/plugin/statusmonitor/icons/monitor-32x32.png";

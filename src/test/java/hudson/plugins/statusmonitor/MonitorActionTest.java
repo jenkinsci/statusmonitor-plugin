@@ -1,168 +1,121 @@
 package hudson.plugins.statusmonitor;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import hudson.matrix.MatrixProject;
 import hudson.maven.MavenModuleSet;
-import hudson.model.AbstractProject;
 import hudson.model.FreeStyleProject;
-import org.jvnet.hudson.test.HudsonTestCase;
+import hudson.model.Job;
+import java.util.List;
+import org.junit.Before;
+import org.junit.Rule;
 
 import java.io.IOException;
+import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
 
 public class MonitorActionTest
-        extends HudsonTestCase
 {
+    @Rule
+    public JenkinsRule jenkins = new JenkinsRule();
+
     private MonitorAction monitorAction;
 
-    @Override
-    protected void setUp() throws Exception
+    @Before
+    public void setUp() throws Exception
     {
-        super.setUp();
-
         monitorAction = new MonitorAction();
     }
 
+    @Test
     public void testGetProjectsArray_shouldGetProjectFreeStyleProjectWithAMonitorPublisher()
             throws Exception
     {
-        FreeStyleProject freeStyleProject = createFreeStyleProject();
-        addMonitorPublisher(freeStyleProject);
+        FreeStyleProject freeStyleProject = jenkins.createFreeStyleProject();
+        addMonitorJobProperty(freeStyleProject);
 
-        AbstractProject[][] projects = monitorAction.getProjectsArray();
+        List<Job<?, ?>> projects = monitorAction.getProjects();
 
-        assertTrue("Free-style project should be in array since one of its publishers is a MonitorPublisher.",
+        assertThat("Free-style project should be in array since JobProperty is set.",
                 isInArray(projects, freeStyleProject));
     }
 
+    @Test
     public void testGetProjectsArray_shouldGetMavenProjectProjectWithAMonitorPublisher()
             throws Exception
     {
-        MavenModuleSet mavenProject = createMavenProject();
-        addMonitorPublisher(mavenProject);
+        MavenModuleSet mavenProject = jenkins.createProject(MavenModuleSet.class, "p");
+        addMonitorJobProperty(mavenProject);
 
-        AbstractProject[][] projects = monitorAction.getProjectsArray();
+        List<Job<?, ?>> projects = monitorAction.getProjects();
 
-        assertTrue("Maven project should be in array since one of its publishers is a MonitorPublisher.",
+        assertThat("Maven project should be in array since JobProperty is set.",
                 isInArray(projects, mavenProject));
     }
 
+    @Test
     public void testGetProjectsArray_shouldGetMatrixProjectWithAMonitorPublisher()
             throws Exception
     {
-        MatrixProject matrixProject = createMatrixProject();
-        addMonitorPublisher(matrixProject);
+        MatrixProject matrixProject = jenkins.createProject(MatrixProject.class, "p");
+        addMonitorJobProperty(matrixProject);
 
-        AbstractProject[][] projects = monitorAction.getProjectsArray();
+        List<Job<?, ?>> projects = monitorAction.getProjects();
 
-        assertTrue("Matrix project should be in array since one of its publishers is a MonitorPublisher.",
+        assertThat("Matrix project should be in array since JobProperty is set.",
                 isInArray(projects, matrixProject));
     }
 
+    @Test
     public void testGetProjectsArray_shouldNotGetProjectsWithoutAMonitorPublisher()
             throws Exception
     {
-        FreeStyleProject freeStyleProject = createFreeStyleProject();
+        FreeStyleProject freeStyleProject = jenkins.createFreeStyleProject();
 
-        AbstractProject[][] projects = monitorAction.getProjectsArray();
+        List<Job<?, ?>> projects = monitorAction.getProjects();
         
-        assertFalse("There should not be any projects in the array since none of the projects have a MonitorPublisher.",
-                isInArray(projects, freeStyleProject));
+        assertThat("There should not be any projects in the array since none of the projects have a MonitorPublisher.",
+                !isInArray(projects, freeStyleProject));
     }
 
+    @Test
     public void testGetProjectsArray_shouldGetMultipleProjectsWhenMultipleProjectsWithMonitorPublishersFound()
             throws Exception
     {
-        FreeStyleProject freeStyleProject = createFreeStyleProject();
-        addMonitorPublisher(freeStyleProject);
-        MatrixProject matrixProject = createMatrixProject();
-        addMonitorPublisher(matrixProject);
+        FreeStyleProject freeStyleProject = jenkins.createFreeStyleProject();
+        addMonitorJobProperty(freeStyleProject);
+        MatrixProject matrixProject = jenkins.createProject(MatrixProject.class, "p");
+        addMonitorJobProperty(matrixProject);
 
-        AbstractProject[][] projects = monitorAction.getProjectsArray();
+        List<Job<?, ?>> projects = monitorAction.getProjects();
 
-        assertTrue("freeStyleProject should be in array since one of its publishers is a MonitorPublisher.",
+        assertThat("freeStyleProject should be in array since one of its publishers is a MonitorPublisher.",
                 isInArray(projects, freeStyleProject));
-        assertTrue("matrixProject should be in array since one of its publishers is a MonitorPublisher.",
+        assertThat("matrixProject should be in array since one of its publishers is a MonitorPublisher.",
                 isInArray(projects, matrixProject));
     }
 
-    public void testGetProjectsArray_shouldBeEmptyArrayWhenNoPojrectsWithMonitorPublishersFound()
+    @Test
+    public void testGetProjectsArray_shouldBeEmptyArrayWhenNoProjectsWithMonitorJobPropertyFound()
     {
-        AbstractProject[][] projects = monitorAction.getProjectsArray();
+        List<Job<?, ?>> projects = monitorAction.getProjects();
 
-        assertEquals(0, projects.length);
+        assertThat("Projects size should be 0", projects.isEmpty());
     }
 
-    public void testGetProjectsArray_shouldBe1Column3RowsWhenThereAreLessThan3ProjectsWithMonitorPublishersFound()
-            throws Exception
-    {
-        addMonitorPublisher(createFreeStyleProject());
-        addMonitorPublisher(createFreeStyleProject());
-        addMonitorPublisher(createFreeStyleProject());
-
-        AbstractProject[][] projects = monitorAction.getProjectsArray();
-
-        assertEquals("Should have 3 rows of projects with MonitorPublisher publishers.", 3, projects.length);
-        assertEquals("Row should have one project.", 1, projects[0].length);
-        assertEquals("Row should have one project.", 1, projects[1].length);
-        assertEquals("Row should have one project.", 1, projects[2].length);
-    }
-
-    public void testGetProjectsArray_shouldHave3RowsAnd2ColumnsOfProjectsWhenThereAreMoreThan3ProjectsWithMonitorPublishersFound()
-            throws Exception
-    {
-        // 7 projects
-        addMonitorPublisher(createFreeStyleProject());
-        addMonitorPublisher(createFreeStyleProject());
-        addMonitorPublisher(createFreeStyleProject());
-        addMonitorPublisher(createFreeStyleProject());
-        addMonitorPublisher(createFreeStyleProject());
-        addMonitorPublisher(createFreeStyleProject());
-        addMonitorPublisher(createFreeStyleProject());
-
-        AbstractProject[][] projects = monitorAction.getProjectsArray();
-
-        assertEquals("Should have 3 rows of projects with MonitorPublisher publishers.", 4, projects.length);
-        assertEquals("Row should have two projects.", 2, projects[0].length);
-        assertEquals("Row should have two projects.", 2, projects[1].length);
-        assertEquals("Row should have two projects.", 2, projects[2].length);
-        assertEquals("Row should have one project by itself.", 1, projects[3].length);
-    }
-
-    public void testGetProjectsArray_shouldHaveLastProjectByItselfInARowWhenMoreThan3ProjectsWithMonitorPublishersFound()
-            throws Exception
-    {
-        // 6 projects
-        addMonitorPublisher(createFreeStyleProject());
-        addMonitorPublisher(createFreeStyleProject());
-        addMonitorPublisher(createFreeStyleProject());
-        addMonitorPublisher(createFreeStyleProject());
-        addMonitorPublisher(createFreeStyleProject());
-        addMonitorPublisher(createFreeStyleProject());
-
-        AbstractProject[][] projects = monitorAction.getProjectsArray();
-
-        assertEquals("Should have 3 rows of projects with MonitorPublisher publishers.", 3, projects.length);
-        assertEquals("Row should have one project.", 2, projects[0].length);
-        assertEquals("Row should have one project.", 2, projects[1].length);
-        assertEquals("Row should have one project.", 2, projects[2].length);
-    }
-
-    private void addMonitorPublisher(AbstractProject project)
+    private void addMonitorJobProperty(Job<?, ?> project)
             throws IOException
     {
-        //noinspection unchecked
-        project.getPublishersList().add(new MonitorPublisher());
+        project.addProperty(new MonitorJobProperty());
     }
 
-    public boolean isInArray(AbstractProject[][] projects, AbstractProject expectedProject)
+    public boolean isInArray(List<Job<?, ?>> projects, Job<?, ?> expectedProject)
     {
-        for (AbstractProject[] rowOfProjects : projects)
+        for (Job<?, ?> project : projects)
         {
-            for (AbstractProject project : rowOfProjects)
+            if (expectedProject == project)
             {
-                if (expectedProject == project)
-                {
-                    return true;
-                }
+                return true;
             }
         }
         return false;
