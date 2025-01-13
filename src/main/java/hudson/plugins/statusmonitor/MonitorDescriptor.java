@@ -4,8 +4,7 @@ import hudson.model.AbstractProject;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
 import net.sf.json.JSONObject;
-
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 @Deprecated
 public class MonitorDescriptor extends BuildStepDescriptor<Publisher> {
@@ -32,7 +31,7 @@ public class MonitorDescriptor extends BuildStepDescriptor<Publisher> {
 
 
 	@Override
-	public Publisher newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+	public Publisher newInstance(StaplerRequest2 req, JSONObject formData) throws FormException {
 		return new MonitorPublisher();
 	}
 
