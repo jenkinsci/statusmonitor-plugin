@@ -1,34 +1,40 @@
 package hudson.plugins.statusmonitor;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.not;
 
 import hudson.matrix.MatrixProject;
 import hudson.maven.MavenModuleSet;
 import hudson.model.FreeStyleProject;
 import hudson.model.Job;
-import java.util.List;
-import org.junit.Before;
-import org.junit.Rule;
 
 import java.io.IOException;
-import org.junit.Test;
-import org.jvnet.hudson.test.JenkinsRule;
+import java.util.List;
 
-public class MonitorActionTest
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
+
+@WithJenkins
+class MonitorActionTest
 {
-    @Rule
-    public JenkinsRule jenkins = new JenkinsRule();
+    private JenkinsRule jenkins;
 
     private MonitorAction monitorAction;
 
-    @Before
-    public void setUp() throws Exception
+    @BeforeEach
+    void setUp(JenkinsRule rule)
     {
+        jenkins = rule;
         monitorAction = new MonitorAction();
     }
 
     @Test
-    public void testGetProjectsArray_shouldGetProjectFreeStyleProjectWithAMonitorPublisher()
+    void testGetProjectsArray_shouldGetProjectFreeStyleProjectWithAMonitorPublisher()
             throws Exception
     {
         FreeStyleProject freeStyleProject = jenkins.createFreeStyleProject();
@@ -37,11 +43,11 @@ public class MonitorActionTest
         List<Job<?, ?>> projects = monitorAction.getProjects();
 
         assertThat("Free-style project should be in array since JobProperty is set.",
-                isInArray(projects, freeStyleProject));
+                projects, contains(freeStyleProject));
     }
 
     @Test
-    public void testGetProjectsArray_shouldGetMavenProjectProjectWithAMonitorPublisher()
+    void testGetProjectsArray_shouldGetMavenProjectProjectWithAMonitorPublisher()
             throws Exception
     {
         MavenModuleSet mavenProject = jenkins.createProject(MavenModuleSet.class, "p");
@@ -50,11 +56,11 @@ public class MonitorActionTest
         List<Job<?, ?>> projects = monitorAction.getProjects();
 
         assertThat("Maven project should be in array since JobProperty is set.",
-                isInArray(projects, mavenProject));
+                projects, contains(mavenProject));
     }
 
     @Test
-    public void testGetProjectsArray_shouldGetMatrixProjectWithAMonitorPublisher()
+    void testGetProjectsArray_shouldGetMatrixProjectWithAMonitorPublisher()
             throws Exception
     {
         MatrixProject matrixProject = jenkins.createProject(MatrixProject.class, "p");
@@ -63,23 +69,23 @@ public class MonitorActionTest
         List<Job<?, ?>> projects = monitorAction.getProjects();
 
         assertThat("Matrix project should be in array since JobProperty is set.",
-                isInArray(projects, matrixProject));
+                projects, contains(matrixProject));
     }
 
     @Test
-    public void testGetProjectsArray_shouldNotGetProjectsWithoutAMonitorPublisher()
+    void testGetProjectsArray_shouldNotGetProjectsWithoutAMonitorPublisher()
             throws Exception
     {
         FreeStyleProject freeStyleProject = jenkins.createFreeStyleProject();
 
         List<Job<?, ?>> projects = monitorAction.getProjects();
-        
+
         assertThat("There should not be any projects in the array since none of the projects have a MonitorPublisher.",
-                !isInArray(projects, freeStyleProject));
+                projects, not(contains(freeStyleProject)));
     }
 
     @Test
-    public void testGetProjectsArray_shouldGetMultipleProjectsWhenMultipleProjectsWithMonitorPublishersFound()
+    void testGetProjectsArray_shouldGetMultipleProjectsWhenMultipleProjectsWithMonitorPublishersFound()
             throws Exception
     {
         FreeStyleProject freeStyleProject = jenkins.createFreeStyleProject();
@@ -89,35 +95,22 @@ public class MonitorActionTest
 
         List<Job<?, ?>> projects = monitorAction.getProjects();
 
-        assertThat("freeStyleProject should be in array since one of its publishers is a MonitorPublisher.",
-                isInArray(projects, freeStyleProject));
-        assertThat("matrixProject should be in array since one of its publishers is a MonitorPublisher.",
-                isInArray(projects, matrixProject));
+        assertThat("freeStyleProject and matrixProject should be in array since one of its publishers is a MonitorPublisher.",
+                projects, containsInAnyOrder(freeStyleProject, matrixProject));
     }
 
     @Test
-    public void testGetProjectsArray_shouldBeEmptyArrayWhenNoProjectsWithMonitorJobPropertyFound()
+    void testGetProjectsArray_shouldBeEmptyArrayWhenNoProjectsWithMonitorJobPropertyFound()
     {
         List<Job<?, ?>> projects = monitorAction.getProjects();
 
-        assertThat("Projects size should be 0", projects.isEmpty());
+        assertThat("Projects size should be 0", projects, empty());
     }
 
-    private void addMonitorJobProperty(Job<?, ?> project)
+    private static void addMonitorJobProperty(Job<?, ?> project)
             throws IOException
     {
         project.addProperty(new MonitorJobProperty());
     }
 
-    public boolean isInArray(List<Job<?, ?>> projects, Job<?, ?> expectedProject)
-    {
-        for (Job<?, ?> project : projects)
-        {
-            if (expectedProject == project)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
 }
