@@ -30,7 +30,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>5.2102.v5f5fe09fccf1</version>
+    <version>6.2116.v7501b_67dc517</version>
     <relativePath />
   </parent>
 
@@ -60,9 +60,12 @@
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
     <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
-    <jenkins.baseline>2.479</jenkins.baseline>
-    <jenkins.version>${jenkins.baseline}.1</jenkins.version>
+    <jenkins.baseline>2.516</jenkins.baseline>
+    <jenkins.version>${jenkins.baseline}.3</jenkins.version>
     <gitHubRepo>jenkinsci/statusmonitor-plugin</gitHubRepo>
+    <ban-junit4-imports.skip>false</ban-junit4-imports.skip>
+    <ban-commons-lang-2.skip>false</ban-commons-lang-2.skip>
+    <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
   </properties>
 
   <dependencyManagement>
@@ -70,7 +73,7 @@
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-${jenkins.baseline}.x</artifactId>
-        <version>3893.v213a_42768d35</version>
+        <version>5933.vcf06f7b_5d1a_2</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
